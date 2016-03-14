@@ -7,11 +7,9 @@ except ImportError:
 # Import the necessary methods from "twitter" library
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
-# some thing else 
 import sys
 import unicodedata
 import time
-#f = open("sample.txt","w")
 
 # Variables that contains the user credentials to access Twitter API 
 ACCESS_TOKEN = '708346536397131776-Yts2WGbk049dA5GGTXeRpNgTcia6hqn'
@@ -23,50 +21,44 @@ oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 
 # Initiate the connection to Twitter Streaming API
 twitter_stream = TwitterStream(auth=oauth)
-start_time = time.time()
-# Get a sample of the public data following through Twitter
+# Get the public data following through Twitter tracking the keyword
 iterator = twitter_stream.statuses.filter(track=str(sys.argv[1]), language="en")
 
 # main
-#tweet_count = 2000
-cache = []
-cache_score = {}
-count = 1
-s = time.time()
-extra_time = 0
+cache = []          # Store words
+cache_score = {}    # Store word count and time
+count = 1           # number of minutes
+s = time.time()     # origin time
 try:
     for tweet in iterator:
-        #tweet_count -= 1
         try:
             line = unicodedata.normalize('NFKD', tweet['text']).encode('ascii','ignore')
             line = line.split(' ')
-            extra_s = time.time()
             for i in line:
                 if i in cache:
-                    cache_score[i] = [cache_score[i][0] + 1, time.time()]
+                    cache_score[i] = [cache_score[i][0] + 1, time.time()]  # increase count if present
                 else:
-                    cache.append(i)
+                    cache.append(i)                                        # add word if not present 
                     cache_score[i] = [ 1 ,time.time()]
-            extra_time += time.time() - extra_s
-            print len(cache)
 
-        except UnicodeEncodeError or KeyError:
+        except  KeyError :
             pass
-        t = time.time()
-        print t - s, extra_time
+        t = time.time()        # current time
         if t - s > count*60:
-            print cache_score
+            # Decrease count for words not occuring for 30s
             for i in cache:
                 if  t - cache_score[i][1] > 30:
                     cache_score[i] = [cache_score[i][0] - 1, time.time()]
+                    # Deleting word from cahe if count is <= 0
                     if cache_score[i][0] <= 0:
                         del cache_score[i]
                         cache.remove(i)
             count += 1
-            print cache_score
+            # Printing words having score > 1
+            for i in cache:
+                if cache_score[i][0] > 1:
+                    print i
+            print "$$After" , count - 1 ,"minutes$$"
            
-        #if tweet_count <= 0:
-        #    print "count over"
-        #    break 
-except KeyboardInterrupt:
-    print time.time() - start_time
+except KeyboardInterrupt:        # Ctrl + C to exit program
+    pass
