@@ -11,7 +11,7 @@ from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 import sys
 import unicodedata
 import time
-f = open("sample.txt","w")
+#f = open("sample.txt","w")
 
 # Variables that contains the user credentials to access Twitter API 
 ACCESS_TOKEN = '708346536397131776-Yts2WGbk049dA5GGTXeRpNgTcia6hqn'
@@ -31,7 +31,7 @@ iterator = twitter_stream.statuses.filter(track=str(sys.argv[1]), language="en")
 # Here we set it to stop after getting 1000 tweets. 
 # You don't have to set it to stop, but can continue running 
 # the Twitter API to collect data for days or even longer. 
-tweet_count = 140
+tweet_count = 380
 cache = []
 cache_score = {}
 s = time.time()
@@ -50,27 +50,40 @@ for tweet in iterator:
             else:
                 cache.append(i)
                 cache_score[i] = [ 1 ,time.time()]
-        print cache
-        print cache_score
+        #print cache
+        #print cache_score
         print len(cache)
 
     except UnicodeEncodeError:
         pass
     t = time.time()
     print t - s
-    if t - s > 60:
+    if t - s > 40:
+        print cache_score
         for i in cache:
-            f.write(str(t - cache_score[i][1]) + "\n")
             if  t - cache_score[i][1]> 30:
                 cache_score[i] = [cache_score[i][0] - 1, time.time()]
-                f.write(i + str(cache_score[i]) + "\n")
+                if cache_score[i][0] <= 0:
+                    del cache_score[i]
+                    cache.remove(i)
         s = time.time()
-        break
-
+        print cache_score
+    '''if t - s > 60:
+        print cache_score
+        for i in cache:
+            if  t - cache_score[i][1]> 30:
+                cache_score[i] = [cache_score[i][0] - 1, time.time()]
+                if cache_score[i][0] <= 0:
+                    del cache_score[i]
+                    cache.remove(i)
+        s = time.time()
+        print cache_score
+'''
     # The command below will do pretty printing for JSON data, try it out
     # print json.dumps(tweet, indent=4)
        
     if tweet_count <= 0:
+        print "count over"
         break 
-f.close()
+#f.close()
 print time.time() - start_time
