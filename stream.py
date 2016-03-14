@@ -27,7 +27,7 @@ iterator = twitter_stream.statuses.filter(track=str(sys.argv[1]), language="en")
 # main
 cache = []          # Store words
 cache_score = {}    # Store word count and time
-count = 1           # number of minutes
+count = 1           # number of 30 seconds
 s = time.time()     # origin time
 try:
     for tweet in iterator:
@@ -44,21 +44,23 @@ try:
         except  KeyError :
             pass
         t = time.time()        # current time
-        if t - s > count*60:
+        if t - s > count*30:
             # Decrease count for words not occuring for 30s
             for i in cache:
-                if  t - cache_score[i][1] > 30:
+                if  t - cache_score[i][1] > 60:
                     cache_score[i] = [cache_score[i][0] - 1, time.time()]
                     # Deleting word from cahe if count is <= 0
                     if cache_score[i][0] <= 0:
                         del cache_score[i]
                         cache.remove(i)
             count += 1
-            # Printing words having score > 1
-            for i in cache:
-                if cache_score[i][0] > 1:
-                    print i
-            print "$$After" , count - 1 ,"minutes$$"
+            # for a minute interval
+            if count % 2 == 1:
+                # Printing words having score > 1
+                for i in cache:
+                    if cache_score[i][0] > 1:
+                        print i
+                print "$$After" , count//2 ,"minutes$$"
            
 except KeyboardInterrupt:        # Ctrl + C to exit program
     pass
