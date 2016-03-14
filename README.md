@@ -10,3 +10,5 @@ $ python stream.py keyword > filename
 
 keyword shouid be single word.
 In case of multiple words only 1st word is considered
+
+Ctrl + C to exit program.
